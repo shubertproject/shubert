@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    p.small-caps {
+        font-variant: small-caps;
+    }
+    .table-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    .centered-table {
+        margin-left: auto;
+        margin-right: auto;
+        border-collapse: collapse;
+        width: 90%;
+    }
+    .centered-table th, .centered-table td {
+        text-align: center;
+        padding: 8px;
+        vertical-align: middle; /* Centers content vertically */
+    }
+    .centered-table thead th {
+        border-bottom: 2px solid black;
+    }
+    .centered-table tfoot td {
+        border-top: 2px solid black;
+    }
+    .centered-table caption {
+      text-align: justify;
+    }
+    .centered-line {
+      display: block;
+      text-align: center;
+    }
+    .image-table {
+    width: 100%;
+  }
+  /* .image-table img {
+    width: 100%;
+    max-width: 100px; 
+  }
+  */
+  .image-table th, .image-table td {
+    text-align: center;
+  }
+  .caption {
+    text-align: justify;
+    margin-top: 10px;
+  }
+  /* Add the media queries here */
+  @media only screen and (max-width: 800px) {
+    .image-table img {
+      max-width: 37px; /* smaller max-width for mobile devices */
+    }
+    .image-table td {
+    font-size: 8px; /* Smaller font size for small screens */
+    }
+    .image-table th {
+    font-size: 8px; /* Smaller font size for small screens */
+    }
+    .centered-table td {
+    font-size: 8px; /* Smaller font size for small screens */
+    }
+    .centered-table th {
+    font-size: 8px; /* Smaller font size for small screens */
+    }
+    .centered-table caption {
+      font-size: 10px;
+    }
+    .image-table caption {
+      font-size: 10px;
+    }
+    .caption {
+      font-size: 10px
+    }
+  }
+
+  @media only screen and (min-width: 801px) {
+    .image-table img {
+      max-width: 100px; /* larger max-width for larger screens */
+    }
+  }
+  .shubert {
+    font-family: "Hurricane", cursive;
+    font-weight: 400;
+    font-style: normal;
+  }
+  </style>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Sign language processing has traditionally relied on taskspecific models, limiting the potential for transfer learning across tasks. We introduce SHuBERT (Sign Hidden-Unit BERT), a self-supervised transformer encoder that learns strong representations from approximately 1,000 hours of American Sign Language (ASL) video content.">
+  <meta name="keywords" content="ASL, American Sign Language, self-supervised learning, transformer, sign language">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SHuBERT: Self-Supervised Sign Language Representation Learning via Multi-Stream Cluster Prediction | ACL 2025 Oral</title>
+  
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script> -->
+  <!-- <script> 
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script> -->
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <!-- <link rel="icon" href="./static/images/favicon.svg"> -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Corinthia:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Corinthia:wght@400;700&family=Hurricane&display=swap" rel="stylesheet">
+  <!-- <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.innerHTML = document.body.innerHTML.replace(/SHuBERT/g, '<span class="shubert">SHuBERT</span>');
+    });
+  </script> -->
+</head>
+<body>
+
+<!-- <nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://keunhong.com">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://hypernerf.github.io">
+            HyperNeRF
+          </a>
+          <a class="navbar-item" href="https://nerfies.github.io">
+            Nerfies
+          </a>
+          <a class="navbar-item" href="https://latentfusion.github.io">
+            LatentFusion
+          </a>
+          <a class="navbar-item" href="https://photoshape.github.io">
+            PhotoShape
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav> -->
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title"> <span class="shubert">SHuBERT</span>: Self-Supervised Sign Language Representation Learning via Multi-Stream Cluster Prediction</h1>
+          <!-- <h3 class="title is-3 publication-title"> (Previous Title: <i>Intrinsic LoRA: A Generalist Approach for Discovering Knowledge in Generative Models</i>)</h3> -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://shesterg.github.io/">Shester Gueuwou</a><sup>1</sup>,</span>
+            </span>
+            <span class="author-block">
+              <a href="https://xiaodan.io/">Xiaodan Du</a><sup>1</sup>,</span>
+            </span>
+            <span class="author-block">
+              <a href="https://home.ttic.edu/~gregory/">Greg Shakhnarovich</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://home.ttic.edu/~klivescu/">Karen Livescu</a><sup>1</sup>
+            </span>
+            <span class="author-block">
+              <a href="https://alexander-h-liu.github.io/">Alexander H. Liu</a><sup>2</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Toyota Technological Institute at Chicago,</span>
+            <span class="author-block"><sup>2</sup>Massachusetts Institute of Technology</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2411.16765"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/ShesterG/SHuBERT"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <!-- <span>Code&nbsp;</span> <p style="color:#39e139">New!</p> -->
+                  <span>Code&nbsp;</span>
+                  </a>
+              </span>
+              <!-- HF Demo Link. -->
+              <span class="link-block">
+                <a href="https://huggingface.co/spaces/ShesterG/TTIC-SHuBERT-VideoSign-TextSpoken"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-rocket"></i>
+                  </span>
+                  <span>Demo</span>
+                </a>
+              </span>
+              
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img id="teaser" src="./static/images/shubert_pipeline.svg" alt="Teaser" style="width: 100%; height: auto;">      
+      <h2 class="subtitle has-text-centered">
+        SHuBERT pre-training. 
+      </h2>
+      <p class="subtitle">
+        (a) We locate a set of landmarks in each frame of the input video using MediaPipe, with inter-frame interpolation to fill in missing landmarks. 
+        From these, we extract the upper body pose, crop the hand and face regions, and blur and partially mask the face crop is blurred for a measure of privacy. 
+        <br>
+        (b) We extract body pose and DINOv2 features for the hands and face, yielding a four-stream representation (two hands, face, body pose) for each frame. 
+        <br>
+        (c) We assign the feature vectors for frame \(t\) to cluster indices using pre-computed \(k\)-means clusters, yielding assignments \((f_t,l_t,r_t,b_t)\in [k]^4\) for face, left and right hand and body pose, respectively.
+        <br>
+        (d) We partially mask the features, which form the input to a transformer encoder. The output of the transformer is fed to a linear classifier 
+        <br>
+        (e) predicting the cluster assignments for each frame, \((\widehat{f}_t,\widehat{l}_t,\widehat{r}_t,\widehat{b}_t)\). 
+        We train the linear layer and the encoder using the log-loss of the predicted vs. true assignments for the masked tokens.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Sign language processing has traditionally relied on task-specific models, limiting the potential for transfer learning across tasks.
+            We introduce SHuBERT (Sign Hidden-Unit BERT), a self-supervised transformer encoder that learns strong representations from approximately 1,000 hours of American Sign Language (ASL) video content. Inspired by the success of the HuBERT speech representation model, SHuBERT adapts masked prediction for multi-stream visual sign language input, learning to predict multiple targets for corresponding to clustered hand, face, and body pose streams.
+            SHuBERT achieves state-of-the-art performance across multiple benchmarks. On sign language translation, it outperforms prior methods trained on publicly available data on the How2Sign (+0.7 BLEU), OpenASL (+10.0 BLEU), and FLEURS-ASL (+0.3 BLEU) benchmarks. Similarly for isolated sign language recognition, SHuBERT's accuracy surpasses that of specialized models on ASL-Citizen (+5%) and SEM-LEX (+20.6%), while coming close to them on WLASL2000 (-3%).  Ablation studies confirm the contribution of each component of the approach. 
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+
+  </div>
+</section>
+
+<!-- Put a section of centered image with caption -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <!-- <h2 class="title is-3">Overview</h2> -->
+         
+        <img id="teaser" src="./static/images/radar4.svg" alt="Radar graph" style="width: 100%; height: auto;">
+        <p class="subtitle">
+          Comparison between our results using fine-tuned SHuBERT and results of the  previous state-of-the-art task-specific models on a suite of multiple tasks, datasets, and metrics. 
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{gueuwou2025shubert,
+      title={SHuBERT: Self-Supervised Sign Language Representation Learning via Multi-Stream Cluster Prediction},
+      author={Gueuwou, Shester and Du, Xiaodan and Shakhnarovich, Greg and Livescu, Karen and Liu, Alexander H},
+      booktitle={Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+      year={2025},
+}
+</code></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns">
+      <div class="column ">
+        <h2 class="title is-3">See also:</h2>
+        <div class="content ">
+          <p>
+            <a href="http://signmusketeers.pals.ttic.edu">[ACL 2025 findings] SignMusketeers: An Efficient Multi-Stream Approach for Sign Language Translation at Scale</a>
+          </p>
+          <br>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website source code based on the <a
+              href="https://github.com/nerfies/nerfies.github.io">NeRFies</a> website repo.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
